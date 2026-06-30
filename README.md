@@ -6,7 +6,9 @@ OCR for Maltese paragraph images from PDF documents. Submitted to the [DocEng 20
 
 Model weights and data files: https://huggingface.co/radmada/lv-rover-mlt
 
-Dev set CER: **0.00700** on 422 paragraphs - roughly 70% below the competition's published Tesseract baseline (0.0234).
+Paper: *LV-ROVER: Multi-Stream Tesseract Voting for Maltese Paragraph OCR* - preprint available on arXiv (link to follow).
+
+Dev set CER: **0.00700** on 422 paragraphs - roughly 70% below the competition's published Tesseract baseline (0.0234). That gain breaks down as: 44% from recognition improvements (fine-tuned Tesseract ensemble), plus 26 percentage points from aligning to the gold label convention (curly quotes, em-dash). See the paper for the decomposition.
 
 ---
 
@@ -85,4 +87,4 @@ Tesseract 5.x must be on PATH. All model files (tessdata, lexicon, confusion tab
 
 ## Training data
 
-Synthetic only. 50,000 line images rendered from the MLRS Korpus Malti v4.2 corpus using 30+ fonts covering the full Maltese diacritic set. Augmentations matched to real PDF crops: JPEG re-encoding at quality ~72, slight rotation, mild blur, brightness variation, paragraph width and font size variation. No real document images were used.
+Synthetic only. 50,000 line images rendered from the MLRS Korpus Malti v4.2 corpus using 68 fonts covering the full Maltese diacritic set. Augmentations matched to real PDF crops: JPEG re-encoding at quality ~72, slight rotation, mild blur, brightness variation, paragraph width and font size variation. No real document images were used.

@@ -1,0 +1,6 @@
+# Install before the organiser's requirements.txt into the same venv.
+# These do not conflict with the organiser's pinned versions.
+malti==0.3.1
+pytesseract==0.3.13
+editdistance==0.8.1
+easyocr==1.7.2

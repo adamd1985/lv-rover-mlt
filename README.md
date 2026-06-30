@@ -2,7 +2,7 @@
 
 # lv-rover-mlt
 
-OCR for Maltese paragraph images from PDF documents. Submitted to DocEng 2026.
+OCR for Maltese paragraph images from PDF documents. Submitted to the [DocEng 2026 Maltese OCR competition](https://doceng.org/doceng2026/maltese-ocr).
 
 Model weights and data files: https://huggingface.co/radmada/lv-rover-mlt
 

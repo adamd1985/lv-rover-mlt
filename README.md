@@ -6,7 +6,7 @@ OCR for Maltese paragraph images from PDF documents. Submitted to the [DocEng 20
 
 Model weights and data files: https://huggingface.co/radmada/lv-rover-mlt
 
-Paper: *LV-ROVER: Multi-Stream Tesseract Voting for Maltese Paragraph OCR* - preprint available on arXiv (link to follow).
+Paper: *LV-ROVER-MLT: Low-Resource Maltese OCR by Multi-Stream Voting* - preprint available on arXiv.
 
 Dev set CER: **0.00700** on 422 paragraphs - roughly 70% below the competition's published Tesseract baseline (0.0234). That gain breaks down as: 44% from recognition improvements (fine-tuned Tesseract ensemble), plus 26 percentage points from aligning to the gold label convention (curly quotes, em-dash). See the paper for the decomposition.
 
@@ -16,7 +16,7 @@ Dev set CER: **0.00700** on 422 paragraphs - roughly 70% below the competition's
 
 The core idea is that multiple Tesseract passes, each using a slightly different language chain or image scale, make different errors on the same image. Running five of them and taking a lexicon-anchored majority vote at the word level recovers most of those errors without any neural network.
 
-The five streams are: `mlt`, `mlt+ita` (anchor), `mlt+ita+fra`, stock Maltese, and `mlt+ita` on a 2x upscaled image. A confusion table built from synthetic Maltese text handles systematic Tesseract character substitutions (mainly the four diacritics - ċ ġ ħ ż). EasyOCR adds a sixth vote.
+The five streams are: `mlt`, `mlt+ita` (anchor), `mlt+ita+fra`, stock Maltese, and `mlt+ita` on a 2x upscaled image. A confusion table built from synthetic Maltese text handles systematic Tesseract character substitutions (mainly the four diacritics - ċ ġ ħ ż).
 
 Post-processing normalises line-break hyphens (removed and word rejoined), structural hyphens (kept), en-dash to em-dash, and curly quotes, to match the gold convention.
 

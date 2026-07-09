@@ -6,7 +6,7 @@ OCR for Maltese paragraph images from PDF documents. Submitted to the [DocEng 20
 
 Model weights and data files: https://huggingface.co/radmada/lv-rover-mlt
 
-Paper: *LV-ROVER-MLT: Low-Resource Maltese OCR by Multi-Stream Voting* - preprint available on arXiv.
+Paper: *LV-ROVER-MLT: Low-Resource Maltese OCR by Multi-Stream Voting* - [preprint on arXiv](https://arxiv.org/abs/2607.00250).
 
 Dev set CER: **0.00700** on 422 paragraphs - roughly 70% below the competition's published Tesseract baseline (0.0234). That gain breaks down as: 44% from recognition improvements (fine-tuned Tesseract ensemble), plus 26 percentage points from aligning to the gold label convention (curly quotes, em-dash). See the paper for the decomposition.
 
@@ -68,6 +68,26 @@ text = t.transcribe(pil_image)
 ```
 
 Tesseract 5.x must be on PATH. All model files (tessdata, lexicon, confusion table) download from HuggingFace on the first `__init__` call. Nothing downloads during `transcribe`.
+
+---
+
+## Using the organiser's dev-set assets
+
+`OCR competition assets for participants/` (organiser-provided, not part of this
+repo's own code) holds the dev-set images + gold labels, the official evaluator, and
+a placeholder `competition_transcriber.py` template that's meant to be replaced with
+a real submission — this repo's `competition_transcriber.py` is that submission.
+
+To evaluate it against the dev set with the organiser's own evaluator:
+
+```
+cp competition_transcriber.py "OCR competition assets for participants/competition_transcriber.py"
+cd "OCR competition assets for participants"
+pip install -r requirements.txt   # organiser's requirements (evaluate, transformers, torch)
+python competition_evaluator.py dev
+```
+
+This prints CER and runtime, and appends a row to `results.txt`.
 
 ---
 

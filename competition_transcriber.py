@@ -46,6 +46,7 @@ import json
 import os
 import platform
 import re
+import shutil
 import unicodedata
 from typing import List, Optional
 
@@ -383,10 +384,12 @@ class CompetitionTranscriber:
         ):
             self.tessdata_dir = self._fallback_tessdata_dir()
         pytesseract.pytesseract.tesseract_cmd = self._resolve_binary(repo_dir)
+        # NB: pytesseract.run_tesseract splits `config` with shlex.split
+        # on Windows, which does not strip quote characters, corrupting a quoted
+        # --tessdata-dir path. TESSDATA_PREFIX avoids the config string entirely.
         if self.tessdata_dir:
-            self.config = f'--tessdata-dir "{self.tessdata_dir}" --psm 6'
-        else:
-            self.config = "--psm 6"
+            os.environ["TESSDATA_PREFIX"] = self.tessdata_dir
+        self.config = "--psm 6"
         self.lang = "mlt"
         self.joiner = RBLineJoiner()
 
@@ -449,28 +452,60 @@ class CompetitionTranscriber:
             return ""
 
     @staticmethod
-    def _fallback_tessdata_dir() -> str:
-        env_dir = os.environ.get("TESSDATA_PREFIX")
-        if env_dir and os.path.isdir(env_dir):
-            return env_dir
-        for cand in (
-            r"C:\\Program Files\\Tesseract-OCR\\tessdata",
-            "/usr/share/tesseract-ocr/5/tessdata",
-            "/usr/share/tesseract-ocr/4.00/tessdata",
-            "/usr/share/tessdata",
-            "/opt/homebrew/share/tessdata",
-        ):
-            if os.path.isdir(cand) and os.path.isfile(os.path.join(cand, "mlt.traineddata")):
+    def _first_existing(candidates, check) -> str:
+        # PATH-based lookups can fail even after a tool is installed!
+        # This checks a list of well-known install locations
+        for cand in candidates:
+            if check(cand):
                 return cand
         return ""
 
-    @staticmethod
-    def _resolve_binary(repo_dir: str) -> str:
+    @classmethod
+    def _fallback_tessdata_dir(cls) -> str:
+        env_dir = os.environ.get("TESSDATA_PREFIX")
+        if env_dir and os.path.isdir(env_dir):
+            return env_dir
+        # Just in case judge has it in a known path.
+        return cls._first_existing(
+            (
+                r"C:\Program Files\Tesseract-OCR\tessdata",
+                "/usr/share/tesseract-ocr/5/tessdata",
+                "/usr/share/tesseract-ocr/4.00/tessdata",
+                "/usr/share/tessdata",
+                "/opt/homebrew/share/tessdata",
+            ),
+            lambda cand: os.path.isdir(cand) and os.path.isfile(os.path.join(cand, "mlt.traineddata")),
+        )
+
+    @classmethod
+    def _resolve_binary(cls, repo_dir: str) -> str:
         exe = "tesseract.exe" if platform.system() == "Windows" else "tesseract"
+        # Explicit override, checked first — same escape hatch TESSDATA_PREFIX
+        # already gives for the data dir. The harness calls CompetitionTranscriber()
+        # with no arguments (no constructor param is possible), so an env var is
+        # the only channel available if every other resolution path misses.
+        env_cmd = os.environ.get("TESSERACT_CMD")
+        if env_cmd and os.path.isfile(env_cmd):
+            return env_cmd
         bundled = os.path.join(repo_dir, "tesseract", exe) if repo_dir else ""
         if bundled and os.path.isfile(bundled):
             return bundled
-        return exe
+        on_path = shutil.which(exe)
+        if on_path:
+            return on_path
+        return (
+            cls._first_existing(
+                (
+                    r"C:\Program Files\Tesseract-OCR\tesseract.exe",
+                    r"C:\Program Files (x86)\Tesseract-OCR\tesseract.exe",
+                    "/usr/bin/tesseract",
+                    "/usr/local/bin/tesseract",
+                    "/opt/homebrew/bin/tesseract",
+                ),
+                os.path.isfile,
+            )
+            or exe
+        )
 
     def _warmup(self) -> None:
         dummy = PIL.Image.new("RGB", (320, 64), color="white")

@@ -59,7 +59,11 @@ print(text)
 
 ## For competition judges
 
-The evaluator can use `competition_transcriber.py` directly from this repo:
+Use the `competition_transcriber.py` from **this GitHub repo** — not the copy on the
+HuggingFace model page. The GitHub copy carries a Windows path fix (it sets
+`TESSDATA_PREFIX` instead of passing `--tessdata-dir "…"` in the Tesseract config
+string, which `pytesseract` mangles via `shlex.split` on Windows). The model weights
+still download from HuggingFace automatically; only the script differs.
 
 ```python
 from competition_transcriber import CompetitionTranscriber
@@ -67,7 +71,18 @@ t = CompetitionTranscriber()
 text = t.transcribe(pil_image)
 ```
 
-Tesseract 5.x must be on PATH. All model files (tessdata, lexicon, confusion table) download from HuggingFace on the first `__init__` call. Nothing downloads during `transcribe`.
+Environment notes for the evaluation machine (Windows 11, Python 3.9, Anaconda):
+
+- **Tesseract 5.x** must be installed. It does not need to be on PATH — the loader
+  finds it on PATH or at the standard `C:\Program Files\Tesseract-OCR\tesseract.exe`
+  location. (Override with the `TESSERACT_CMD` env var if it lives elsewhere.)
+- **Install order**: install this repo's `requirements.txt` *before* the organiser's.
+  The pins do not conflict (`malti==0.3.1` pulls only `sentence-splitter==1.4`).
+- **`easyocr` is optional and not required** — it is in neither requirements file, so
+  it is skipped automatically. It is a research-only extra (it would fetch weights
+  from a non-HuggingFace host, which the rules disallow) and does not change the CER.
+- On first `__init__`, all model files (tessdata, lexicon, confusion table, ~260 MB)
+  download from HuggingFace. **Nothing downloads during `transcribe`.**
 
 ---
 
@@ -102,6 +117,10 @@ This prints CER and runtime, and appends a row to `results.txt`.
 | `tessdata/fra.traineddata` | French chain (mlt+ita+fra stream) |
 | `tess_confusion.json` | Character confusion correction table |
 | `maltese_en_it_lexicon.json` | Lexicon for vote arbitration |
+
+The `competition_transcriber.py` on HuggingFace is the frozen deadline submission and
+fails on Windows (see [For competition judges](#for-competition-judges)). Run the copy
+from this GitHub repo instead; the weights above are unchanged and still load from HuggingFace.
 
 ---
 

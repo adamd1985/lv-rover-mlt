@@ -1,4 +1,4 @@
-transformers==4.57.6
+transformers==5.5.0
 pillow==11.3.0
 evaluate==0.4.6
 jiwer==4.0.0

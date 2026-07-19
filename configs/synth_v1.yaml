@@ -1,0 +1,93 @@
+# synth_v1.yaml
+# Domain-gap-corrected config for shard_0003 and later.
+# Domain-gap fixes: DPI mismatch, JPEG quality mismatch,
+# paragraph length mismatch, width range mismatch.
+
+corpus:
+  english_frac: 0.12
+  use_streaming: true
+  seed: 43
+  mode: korpus_malti
+  public_fallback:
+    english_frac: 0.12
+    sources:
+      - name: wikipedia_mt
+        kind: hf
+        path: wikimedia/wikipedia
+        config: 20231101.mt
+        split: train
+        text_field: text
+        weight: 0.8
+      - name: ud_mudt
+        kind: ud_conllu
+        weight: 0.2
+        urls:
+          - https://raw.githubusercontent.com/UniversalDependencies/UD_Maltese-MUDT/master/mt_mudt-ud-train.conllu
+          - https://raw.githubusercontent.com/UniversalDependencies/UD_Maltese-MUDT/master/mt_mudt-ud-dev.conllu
+          - https://raw.githubusercontent.com/UniversalDependencies/UD_Maltese-MUDT/master/mt_mudt-ud-test.conllu
+
+fonts:
+  dir: data/fonts
+  handwriting_rate: 0.05
+  fallback_system: false
+
+layout:
+  # Render at 150 DPI to match real dev images (domain-gap diagnosis).
+  # Real dev: mean 45 px/line. At 10pt, 150 DPI -> 21px/line; at 10pt, 300 DPI -> 42px/line.
+  # We keep 300 DPI but post-scale down 0.5x in the shard writer to preserve sub-pixel quality.
+  # post_scale: 0.5 is set in the shard section.
+  dpi: 300
+  font_pt_lo: 8
+  font_pt_hi: 14
+  line_spacing_lo: 1.0
+  line_spacing_hi: 1.6
+  # Width matches real dev distribution (71-2042px, mean 581). Use 150-700 at native DPI;
+  # after 0.5x post-scale this becomes 75-350px at output resolution.
+  paragraph_width_lo: 300
+  paragraph_width_hi: 1400
+  pad_x: 12
+  pad_y: 8
+  justify_p: 0.45
+  leading_bullet_p: 0.10
+  hyphenation_rate: 0.06
+  article_inject_rate: 0.08
+  dash_substitute_p: 0.05
+  # Cap paragraph length to match real distribution (mean 2.7 lines, max 27).
+  # Set max_lines to 8 to cover 95th percentile without excessive tall crops.
+  max_lines: 8
+
+augmentations:
+  # JPEG quality range targeting real dev quantization (avg 29.0).
+  # PIL Q=70 -> quantization ~29. Keep range 65-80 to allow variation.
+  jpeg_q_lo: 65
+  jpeg_q_hi: 80
+  rotation_deg: 1.5
+  blur_sigma_lo: 0.3
+  blur_sigma_hi: 0.8
+  sp_prob: 0.008
+  brightness_jitter: 0.12
+  contrast_jitter: 0.12
+  ink_bleed_p: 0.20
+  column_edge_crop_p: 0.08
+  elastic_alpha: 1.2
+  jbig2_binarise_p: 0.05
+  page_edge_shadow_p: 0.10
+  pdf_subpixel_blur_p: 0.30
+  # Slight grey background to remove pure-white assumption.
+  grey_bg_lo: 235
+  grey_bg_hi: 255
+
+shard:
+  format: dir
+  use_jpeg: true
+  # Lower JPEG quality at save time to baseline-match real (Q=70-75).
+  jpeg_quality: 72
+  # Post-scale: lanczos 0.5x after render. Halves DPI from 300 to 150 effective.
+  # This brings synth px/line from ~80 to ~40, matching real dev median 42 px/line.
+  post_scale: 0.5
+  preview_count: 10
+  seed: 1337
+
+smoke:
+  n_samples: 8
+  benchmark_cuda: true

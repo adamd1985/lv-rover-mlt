@@ -1,0 +1,77 @@
+# synth_v0.yaml
+# Canonical config for the v0 paragraph synth pipeline. Read by the smoke test
+# and by generate_shard.py.
+
+corpus:
+  english_frac: 0.12
+  use_streaming: true   # streams MLRS/korpus_malti v4.2 if HF_TOKEN is set; falls back to fixture
+  seed: 42
+  # mode: korpus_malti (default, requires gated HF access) | public_fallback | fixture
+  # public_fallback path preserves sentence order (no global shuffle).
+  mode: korpus_malti
+  public_fallback:
+    english_frac: 0.12
+    sources:
+      - name: wikipedia_mt
+        kind: hf
+        path: wikimedia/wikipedia
+        config: 20231101.mt
+        split: train
+        text_field: text
+        weight: 0.8         # CC-BY-SA-3.0 + GFDL, public, ungated, ~5.74k articles
+      - name: ud_mudt
+        kind: ud_conllu
+        weight: 0.2          # CC-BY-SA-4.0, ~2.07k clean sentences (UD treebank)
+        urls:
+          - https://raw.githubusercontent.com/UniversalDependencies/UD_Maltese-MUDT/master/mt_mudt-ud-train.conllu
+          - https://raw.githubusercontent.com/UniversalDependencies/UD_Maltese-MUDT/master/mt_mudt-ud-dev.conllu
+          - https://raw.githubusercontent.com/UniversalDependencies/UD_Maltese-MUDT/master/mt_mudt-ud-test.conllu
+
+fonts:
+  dir: data/fonts
+  handwriting_rate: 0.05   # 95/5 printed/handwriting; pool is 62 printed + 6 handwriting
+  fallback_system: false   # real shard uses the validated MANIFEST.json only
+
+layout:
+  dpi: 300
+  font_pt_lo: 8
+  font_pt_hi: 14
+  line_spacing_lo: 1.0
+  line_spacing_hi: 1.6
+  paragraph_width_lo: 400
+  paragraph_width_hi: 1200
+  pad_x: 24
+  pad_y: 18
+  justify_p: 0.45
+  leading_bullet_p: 0.10
+  hyphenation_rate: 0.06
+  article_inject_rate: 0.08
+  dash_substitute_p: 0.05
+
+augmentations:
+  jpeg_q_lo: 60
+  jpeg_q_hi: 92
+  rotation_deg: 1.5
+  blur_sigma_lo: 0.3
+  blur_sigma_hi: 0.8
+  sp_prob: 0.008
+  brightness_jitter: 0.12
+  contrast_jitter: 0.12
+  ink_bleed_p: 0.20
+  column_edge_crop_p: 0.08
+  elastic_alpha: 1.2
+  jbig2_binarise_p: 0.05
+  page_edge_shadow_p: 0.10
+  pdf_subpixel_blur_p: 0.30
+
+shard:
+  format: dir            # "dir" => NNNNNN.png + NNNNNN.json; "tar" => single .tar (not required for v0)
+  png_quality: 90        # used only if writer falls back to JPEG; PNGs are lossless
+  use_jpeg: true         # write JPEG to hit disk budget; lossless PNG balloons past 2GB at 10k
+  jpeg_quality: 88
+  preview_count: 10
+  seed: 1337
+
+smoke:
+  n_samples: 8
+  benchmark_cuda: true

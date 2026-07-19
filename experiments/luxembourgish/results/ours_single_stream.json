@@ -1,0 +1,6 @@
+{
+  "lines": 200,
+  "cer": 0.1821941888119119,
+  "lang": "ltz (fine-tuned)",
+  "config": "--psm 7"
+}

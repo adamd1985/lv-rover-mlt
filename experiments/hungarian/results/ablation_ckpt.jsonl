@@ -1,0 +1,6 @@
+{"i": 0, "stock_raw": [448, 1817], "stock_plus_postproc": [448, 1817], "five_stream_pre_postproc": [435, 1817], "five_stream_full_pipeline": [435, 1817], "conv_stock_raw": [448, 1817], "conv_five_stream_pre_postproc": [435, 1817]}
+{"i": 1, "stock_raw": [83, 2790], "stock_plus_postproc": [82, 2790], "five_stream_pre_postproc": [60, 2790], "five_stream_full_pipeline": [59, 2790], "conv_stock_raw": [82, 2790], "conv_five_stream_pre_postproc": [59, 2790]}
+{"i": 2, "stock_raw": [51, 1700], "stock_plus_postproc": [51, 1700], "five_stream_pre_postproc": [23, 1700], "five_stream_full_pipeline": [23, 1700], "conv_stock_raw": [51, 1700], "conv_five_stream_pre_postproc": [23, 1700]}
+{"i": 3, "stock_raw": [143, 3293], "stock_plus_postproc": [143, 3293], "five_stream_pre_postproc": [163, 3293], "five_stream_full_pipeline": [163, 3293], "conv_stock_raw": [143, 3293], "conv_five_stream_pre_postproc": [163, 3293]}
+{"i": 4, "stock_raw": [234, 2465], "stock_plus_postproc": [234, 2465], "five_stream_pre_postproc": [183, 2465], "five_stream_full_pipeline": [183, 2465], "conv_stock_raw": [232, 2465], "conv_five_stream_pre_postproc": [181, 2465]}
+{"i": 5, "stock_raw": [579, 1821], "stock_plus_postproc": [579, 1821], "five_stream_pre_postproc": [570, 1821], "five_stream_full_pipeline": [570, 1821], "conv_stock_raw": [579, 1821], "conv_five_stream_pre_postproc": [570, 1821]}

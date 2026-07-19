@@ -1,0 +1,39 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+.pytest_cache/
+mlruns/
+.ruff_cache/
+.mypy_cache/
+
+# Fetched assets - pulled by scripts/fetch_assets.sh, never committed
+data/fonts/
+data/tesseract/
+data/corpus/
+data/synth/
+*.traineddata
+maltese_en_it_lexicon.json
+
+# Experiment working data and weights - published to Hugging Face instead
+experiments/*/data/
+experiments/*/tessdata_*/
+outputs/
+
+# Corpus build products
+experiments/corpus/out/
+experiments/corpus/*_verified/
+
+# Local environment
+.env
+.env.*
+!.env.example
+
+# OS / editor
+.DS_Store
+*.swp

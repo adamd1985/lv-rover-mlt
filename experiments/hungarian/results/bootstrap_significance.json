@@ -1,0 +1,13 @@
+{
+  "n_pages": 200,
+  "cer_stock": 0.13543193724154962,
+  "cer_ensemble": 0.1343775560424625,
+  "point_delta": 0.0010543811990871288,
+  "ci_95_lo": -0.0037123356084568238,
+  "ci_95_hi": 0.0054291780933881095,
+  "excludes_zero": false,
+  "permutation_p_value": 0.6555,
+  "permutation_critical_value_alpha05": 0.004392671174934443,
+  "significant_alpha05": false,
+  "seed": 42
+}

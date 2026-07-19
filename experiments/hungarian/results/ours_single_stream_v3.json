@@ -1,0 +1,6 @@
+{
+  "pages": 200,
+  "cer": 0.1472020210691554,
+  "lang": "hun (fine-tuned v3)",
+  "config": "--psm 3"
+}

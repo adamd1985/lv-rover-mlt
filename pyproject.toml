@@ -1,0 +1,55 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "lv-rover-mlt"
+version = "1.0.0"
+description = "Low-resource Maltese paragraph OCR by synthetic fine-tuning and multi-stream arbitration"
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "Apache-2.0" }
+authors = [{ name = "Adam Darmanin", email = "adamdarmanin@hecatusresearch.com" }]
+keywords = ["ocr", "maltese", "low-resource", "tesseract", "synthetic-data"]
+classifiers = [
+  "Programming Language :: Python :: 3.9",
+  "License :: OSI Approved :: Apache Software License",
+  "Topic :: Scientific/Engineering :: Image Recognition",
+]
+dependencies = [
+  "malti==0.3.1",
+  "pytesseract==0.3.13",
+  "editdistance==0.8.1",
+  "huggingface_hub<1.0",
+  "Pillow>=9.0",
+]
+
+[project.optional-dependencies]
+replication = [
+  "jiwer>=3.0", "numpy>=1.23", "PyYAML>=6.0", "fonttools>=4.40",
+  "datasets>=2.14", "requests>=2.28", "PyMuPDF>=1.23",
+  "pyrate-limiter>=3.0", "pdf2image>=1.16", "pyphen>=0.14",
+  "pandas>=1.5", "pytest>=7.0",
+]
+
+[project.urls]
+Repository = "https://github.com/adamd1985/lv-rover-mlt"
+Weights = "https://huggingface.co/radmada/lv-rover-mlt"
+Corpus = "https://huggingface.co/datasets/radmada/maltese-ocr-corpus"
+
+[tool.setuptools]
+py-modules = ["competition_transcriber"]
+
+[tool.setuptools.packages.find]
+include = ["src*", "scripts*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py39"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "N"]
+ignore = ["E501", "N806", "N803"]

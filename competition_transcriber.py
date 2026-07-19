@@ -34,9 +34,11 @@ Tesseract streams plus label-convention normalisation:
      plurality rule, not a majority rule - no quorum is required, and a
      single stream's eligible proposal can win when no other stream proposes
      a competing alternative. Ties break by stream order.
-  5. Label-convention normalisation: leading clause marker "N — " and
-     curly quotes (positional U+2018 / U+2019), matching the organiser
-     gold convention that Tesseract does not emit.
+  5. Label-convention normalisation: leading clause marker "N — ", single
+     curly quotes (positional U+2018 / U+2019), double curly quotes
+     (positional U+201C / U+201D), and the diacritic-restoration proposal
+     folded into arbitration above, matching the organiser gold convention
+     that Tesseract does not emit.
 
 Dev set CER: 0.00700 on 422 paragraphs (jiwer).
 

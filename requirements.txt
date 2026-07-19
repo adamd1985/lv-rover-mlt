@@ -4,5 +4,3 @@ malti==0.3.1
 pytesseract==0.3.13
 editdistance==0.8.1
 huggingface_hub<1.0
-# easyocr is deliberately NOT listed here. competition_transcriber.py enables
-# it automatically whenever it's importable.

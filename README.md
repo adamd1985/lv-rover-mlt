@@ -6,7 +6,7 @@ OCR for Maltese paragraph images from PDF documents. Submitted to the [DocEng 20
 
 Model weights and data files: https://huggingface.co/radmada/lv-rover-mlt
 
-Paper: *LV-ROVER-MLT: Low-Resource Maltese OCR by Multi-Stream Voting* - [preprint on arXiv](https://arxiv.org/abs/2607.00250).
+Paper: *LV-ROVER-MLT: Low-Resource Maltese OCR by Fine-Tuning and Multi-Stream Arbitration* - [preprint on arXiv](https://arxiv.org/abs/2607.00250).
 
 Dev set CER: **0.00700** on 422 paragraphs - roughly 70% below the competition's published Tesseract baseline (0.0234). That gain breaks down as: 44% from recognition improvements (fine-tuned Tesseract ensemble), plus 26 percentage points from aligning to the gold label convention (curly quotes, em-dash). See the paper for the decomposition.
 
@@ -14,7 +14,7 @@ Dev set CER: **0.00700** on 422 paragraphs - roughly 70% below the competition's
 
 ## How it works
 
-The core idea is that multiple Tesseract passes, each using a slightly different language chain or image scale, make different errors on the same image. Running five of them and taking a lexicon-anchored majority vote at the word level recovers most of those errors without any neural network.
+The core idea is that multiple Tesseract passes, each using a slightly different language chain or image scale, make different errors on the same image. Running five of them and arbitrating at the word level under a lexicon-gated plurality rule (no quorum required) recovers most of those errors. Tesseract 5 itself is an LSTM recognizer; the arbitration step does not add a second neural network on top of it.
 
 The five streams are: `mlt`, `mlt+ita` (anchor), `mlt+ita+fra`, stock Maltese, and `mlt+ita` on a 2x upscaled image. A confusion table built from synthetic Maltese text handles systematic Tesseract character substitutions (mainly the four diacritics - ċ ġ ħ ż).
 
@@ -78,9 +78,6 @@ Environment notes for the evaluation machine (Windows 11, Python 3.9, Anaconda):
   location. (Override with the `TESSERACT_CMD` env var if it lives elsewhere.)
 - **Install order**: install this repo's `requirements.txt` *before* the organiser's.
   The pins do not conflict (`malti==0.3.1` pulls only `sentence-splitter==1.4`).
-- **`easyocr` is optional and not required** — it is in neither requirements file, so
-  it is skipped automatically. It is a research-only extra (it would fetch weights
-  from a non-HuggingFace host, which the rules disallow) and does not change the CER.
 - On first `__init__`, all model files (tessdata, lexicon, confusion table, ~260 MB)
   download from HuggingFace. **Nothing downloads during `transcribe`.**
 

@@ -14,8 +14,8 @@ Contract (competition rules):
   - No network access after `__init__` except the HuggingFace download.
   - Deterministic for the same image.
 
-Approach: all gains from lexicon-anchored arbitration over diverse Tesseract
-streams plus label-convention normalisation:
+Approach: all gains from lexicon-gated plurality arbitration over diverse
+Tesseract streams plus label-convention normalisation:
 
   1. Five Tesseract streams per image: mlt, mlt+ita (anchor), mlt+ita+fra,
      stock mlt, and mlt+ita on a 2x-upscaled image. Diversity across
@@ -26,10 +26,14 @@ streams plus label-convention normalisation:
      longest is the base.
   3. Length-gated confusion corrector: single-char swaps for non-lexicon
      words via a synth-derived P(true_char | tess_char) table.
-  4. LV-ROVER lexicon-anchored majority vote over the candidate streams +
-     EasyOCR: an anchor word not in the lexicon is replaced only when a
-     majority of candidates agree on a lexicon-valid, edit-distance-bounded,
-     diacritic-preserving alternative.
+  4. LV-ROVER-derived lexicon-gated plurality arbitration over the candidate
+     streams: a diacritic-restoration gate is checked first and can replace
+     an already lexicon-valid anchor; only if it does not fire does the
+     ordinary swap gate apply, replacing an out-of-lexicon anchor with the
+     most-voted lexicon-valid, edit-distance-bounded candidate. This is a
+     plurality rule, not a majority rule - no quorum is required, and a
+     single stream's eligible proposal can win when no other stream proposes
+     a competing alternative. Ties break by stream order.
   5. Label-convention normalisation: leading clause marker "N — " and
      curly quotes (positional U+2018 / U+2019), matching the organiser
      gold convention that Tesseract does not emit.
@@ -37,8 +41,7 @@ streams plus label-convention normalisation:
 Dev set CER: 0.00700 on 422 paragraphs (jiwer).
 
 The pipeline degrades gracefully: if the corrector data / router lexicon
-is missing from the bundle it falls back to bare Tesseract; if EasyOCR is
-unavailable it is simply one fewer candidate stream.
+is missing from the bundle it falls back to bare Tesseract.
 """
 from __future__ import annotations
 
@@ -55,7 +58,6 @@ import pytesseract
 from malti.line_joiner import RBLineJoiner
 
 HF_REPO_DEFAULT = os.environ.get("DOCENG_HF_REPO", "radmada/lv-rover-mlt")
-_EASYOCR_LANGS = ("mt",)
 _CROSS_ENGINE_MAX_SWAP_DIST = 2
 _TESS_LANG_PRIMARY = "mlt"
 _TESS_LANG_AUGMENTED = "mlt+ita"
@@ -395,10 +397,8 @@ class CompetitionTranscriber:
 
         self.corrector = None
         self.router = None
-        self.easyocr = None
         self._lexicon: set = set()
         self._try_load_corrector(repo_dir)
-        self._try_load_easyocr()
         self._warmup()
 
     def _try_load_corrector(self, repo_dir: str) -> None:
@@ -429,13 +429,6 @@ class CompetitionTranscriber:
         except Exception:
             self.corrector = None
             self.router = None
-
-    def _try_load_easyocr(self) -> None:
-        try:
-            import easyocr
-            self.easyocr = easyocr.Reader(list(_EASYOCR_LANGS), gpu=False, verbose=False)
-        except Exception:
-            self.easyocr = None
 
     @staticmethod
     def _resolve_repo(model_id: str) -> str:
@@ -510,23 +503,6 @@ class CompetitionTranscriber:
     def _warmup(self) -> None:
         dummy = PIL.Image.new("RGB", (320, 64), color="white")
         pytesseract.image_to_string(dummy, lang=self.lang, config=self.config)
-        if self.easyocr is not None:
-            try:
-                import numpy as np
-                self.easyocr.readtext(np.asarray(dummy), detail=0, paragraph=True)
-            except Exception:
-                self.easyocr = None
-
-    def _easyocr_paragraph(self, image: PIL.Image.Image) -> str:
-        if self.easyocr is None:
-            return ""
-        try:
-            import numpy as np
-            arr = np.asarray(image)
-            res = self.easyocr.readtext(arr, detail=0, paragraph=True)
-            return _normalise(" ".join(res) if res else "")
-        except Exception:
-            return ""
 
     def _tess_paragraph(self, image: PIL.Image.Image, lang: str) -> str:
         raw = pytesseract.image_to_string(image, lang=lang, config=self.config)
@@ -582,10 +558,6 @@ class CompetitionTranscriber:
             joined = self.corrector.correct(joined)
 
         candidates = []
-        if self.easyocr is not None:
-            easy_out = self._easyocr_paragraph(image)
-            if easy_out:
-                candidates.append(easy_out)
         for cand in (mlt_out, ita_out, romance_out, stock_out, up_out):
             if cand and cand != base and cand not in candidates:
                 candidates.append(cand)
